@@ -2,15 +2,14 @@ import dotenv from 'dotenv';
 import express from 'express';
 import linebot from 'linebot';
 
+dotenv.config();
+const app = express();
+
 const bot = linebot({
   channelId: process.env.CHANNEL_ID,
   channelSecret: process.env.CHANNEL_SECRET,
   channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN
 });
-
-dotenv.config();
-
-const app = express();
 
 const linebotParser = bot.parser();
 
