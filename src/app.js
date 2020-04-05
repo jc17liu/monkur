@@ -1,9 +1,15 @@
 import dotenv from 'dotenv';
 import express from 'express';
 import linebot from 'linebot';
+import { LineMessageService } from './services';
+import { TestController } from './controllers';
 
-dotenv.config();
 const app = express();
+dotenv.config();
+app.use(express.json());
+
+const lineMessageService = new LineMessageService();
+const testController = new TestController();
 
 const bot = linebot({
   channelId: process.env.CHANNEL_ID,
@@ -15,13 +21,10 @@ const linebotParser = bot.parser();
 
 app.get('/', (req, res) => { res.send('Welcome to Monkur'); });
 app.post('/line-messages', linebotParser);
+app.use('/tests', testController);
 
 bot.on('message', (event) => {
-  event.reply(event.message.text).then((data) => {
-    console.log('Success', data);
-  }).catch((error) => {
-    console.log('Error', error);
-  });
+  lineMessageService.processEvent(event);
 });
 
 export default app;
