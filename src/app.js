@@ -6,7 +6,6 @@ import { TestController } from './controllers';
 
 const app = express();
 dotenv.config();
-app.use(express.json());
 
 const lineMessageService = new LineMessageService();
 const testController = new TestController();
@@ -21,6 +20,7 @@ const linebotParser = bot.parser();
 
 app.get('/', (req, res) => { res.send('Welcome to Monkur'); });
 app.post('/line-messages', linebotParser);
+app.use(express.json());
 app.use('/tests', testController);
 
 bot.on('message', (event) => {
