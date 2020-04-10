@@ -1,6 +1,7 @@
 import {
   MESSAGES,
-  MESSAGE_TYPE
+  MESSAGE_TYPE,
+  RESERVED_MESSAGES_CODES
 } from '../constants';
 import CurrencyService from './currency.service';
 import { messageBuilder } from '../utils';
@@ -33,12 +34,22 @@ class LineMessageService {
     const base = incomingMessage.substr(incomingMessage.search('=') - 3, 3);
     const target = incomingMessage.substr(incomingMessage.search('=') + 1, 3);
 
+    if (RESERVED_MESSAGES_CODES.includes(incomingMessage)) {
+      return;
+    }
+
+    const validMessageFormat = /^\d{0,13}.?\d{0,4}[A-Za-z]{3}=[A-Za-z]{3}$/;
+      if (!validMessageFormat.test(incomingMessage)) {
+        await event.reply(this.createMessage(MESSAGES["message.system.invalid.input"]));
+        return;
+      }
+
     // Get the number in the message
     const num = Number(incomingMessage.replace(/[^0-9\.]+/g, '')) || 1;
 
     try {
       const convertedRate = await this.currencyService.convertRates(base, target);
-      const result = (num * convertedRate);
+      const result = (num * convertedRate).toFixed(4);
       const returnMessage = messageBuilder(MESSAGES["message.converted.rate"], {
         base,
         target,

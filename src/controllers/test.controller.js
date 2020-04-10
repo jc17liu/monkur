@@ -2,7 +2,8 @@ import express from 'express';
 import { CurrencyService } from '../services';
 import {
   HTTP_CODES,
-  MESSAGES
+  MESSAGES,
+  RESERVED_MESSAGES_CODES
 } from '../constants';
 import { messageBuilder } from '../utils';
 
@@ -36,12 +37,23 @@ class TestController extends express.Router {
       const base = incomingMessage.substr(incomingMessage.search('=') - 3, 3);
       const target = incomingMessage.substr(incomingMessage.search('=') + 1, 3);
 
+      if (RESERVED_MESSAGES_CODES.includes(incomingMessage)) {
+        res.status(HTTP_CODES.OK).send('');
+        return;
+      }
+
+      const validMessageFormat = /^\d{0,13}.?\d{0,4}[A-Za-z]{3}=[A-Za-z]{3}$/;
+      if (!validMessageFormat.test(incomingMessage)) {
+        res.status(HTTP_CODES.FORBIDDEN).send(MESSAGES["message.system.invalid.input"]);
+        return;
+      }
+
       // Get the number in the message
       const num = Number(incomingMessage.replace(/[^0-9\.]+/g, '')) || 1;
 
       try {
         const convertedRate = await this.currencyService.convertRates(base, target);
-        const result = (num * convertedRate);
+        const result = (num * convertedRate).toFixed(4);
         const returnMessage = messageBuilder(MESSAGES["message.converted.rate"], {
           base,
           target,
