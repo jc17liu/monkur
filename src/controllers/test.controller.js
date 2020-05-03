@@ -1,5 +1,7 @@
 import express from 'express';
-import { CurrencyService } from '../services';
+import { 
+  CurrencyService
+} from '../services';
 import {
   HTTP_CODES,
   MESSAGES,
@@ -14,8 +16,8 @@ class TestController extends express.Router {
 
     this.get('/rates', async(req, res) => {
       try {
-        const rates = await this.currencyService.getAllCurrencyRates();
-        res.status(HTTP_CODES.OK).send(rates.data.rates);
+        const rates = await this.currencyService.getCurrencyRates();
+        res.status(HTTP_CODES.OK).send(rates);
       } catch(e) {
         res.status(HTTP_CODES.INTERNAL_SERVER_ERROR).send(e);
       }
